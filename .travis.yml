@@ -7,6 +7,7 @@ go:
 install:
   - go get github.com/boltdb/bolt
   - go get github.com/pkg/errors
+  - go get github.com/stretchr/testify/assert
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
 
