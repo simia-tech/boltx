@@ -23,15 +23,15 @@ func Put(bucket *bolt.Bucket, key []byte, model encoding.BinaryMarshaler) error 
 
 // Get loads the value from the provided bucket at the provided key and unmarshals it into the
 // provided model.
-func Get(bucket *bolt.Bucket, key []byte, model encoding.BinaryUnmarshaler) error {
+func Get(bucket *bolt.Bucket, key []byte, model encoding.BinaryUnmarshaler) (bool, error) {
 	value := bucket.Get(key)
 	if len(value) == 0 {
-		return nil
+		return false, nil
 	}
 
 	if err := model.UnmarshalBinary(value); err != nil {
-		return errors.Wrap(err, "unmarshaling failed")
+		return false, errors.Wrap(err, "unmarshaling failed")
 	}
 
-	return nil
+	return true, nil
 }

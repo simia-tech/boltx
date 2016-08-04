@@ -9,19 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type model struct {
-	field string
-}
-
-func (m *model) MarshalBinary() ([]byte, error) {
-	return []byte(m.field), nil
-}
-
-func (m *model) UnmarshalBinary(data []byte) error {
-	m.field = string(data)
-	return nil
-}
-
 func TestPutAndGet(t *testing.T) {
 	db, tearDown := setUpTestDB(t)
 	defer tearDown()
@@ -31,8 +18,10 @@ func TestPutAndGet(t *testing.T) {
 		require.NoError(t, boltx.Put(bucket, key, value))
 
 		model := &model{}
-		require.NoError(t, boltx.Get(bucket, key, model))
+		found, err := boltx.Get(bucket, key, model)
+		require.NoError(t, err)
 
+		assert.True(t, found)
 		assert.Equal(t, "test", model.field)
 	})
 }
@@ -43,8 +32,10 @@ func TestGetOfMissingModel(t *testing.T) {
 
 	inTestBucket(t, db, func(bucket *bolt.Bucket) {
 		model := &model{}
-		require.NoError(t, boltx.Get(bucket, []byte("missing"), model))
+		found, err := boltx.Get(bucket, []byte("missing"), model)
+		require.NoError(t, err)
 
+		assert.False(t, found)
 		assert.Equal(t, "", model.field)
 	})
 }
