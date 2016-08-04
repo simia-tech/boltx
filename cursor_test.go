@@ -50,6 +50,52 @@ func TestCursorIteratingBackward(t *testing.T) {
 	})
 }
 
+func TestCursorIteratingInEmptyBucket(t *testing.T) {
+	db, tearDown := setUpTestDB(t)
+	defer tearDown()
+
+	assertNoElement := func(key []byte, err error) {
+		assert.Nil(t, key)
+		require.NoError(t, err)
+	}
+
+	inTestBucket(t, db, func(bucket *bolt.Bucket) {
+		cursor := boltx.Cursor(bucket)
+		assert.Equal(t, bucket, cursor.Bucket())
+
+		assertNoElement(cursor.First(nil))
+		assertNoElement(cursor.Last(nil))
+		assertNoElement(cursor.Next(nil))
+		assertNoElement(cursor.Prev(nil))
+		assertNoElement(cursor.Seek(nil, nil))
+	})
+}
+
+func TestCursorIteratingOverInvalidElements(t *testing.T) {
+	db, tearDown := setUpTestDB(t)
+	defer tearDown()
+
+	assertError := func(key []byte, err error) {
+		assert.NotNil(t, key)
+		assert.Error(t, err)
+	}
+
+	inTestBucket(t, db, func(bucket *bolt.Bucket) {
+		require.NoError(t, bucket.Put([]byte("one"), []byte("invalid")))
+		require.NoError(t, bucket.Put([]byte("two"), []byte("invalid")))
+
+		cursor := boltx.Cursor(bucket)
+		assert.Equal(t, bucket, cursor.Bucket())
+
+		model := &model{}
+		assertError(cursor.First(model))
+		assertError(cursor.Next(model))
+		assertError(cursor.Last(model))
+		assertError(cursor.Prev(model))
+		assertError(cursor.Seek(nil, model))
+	})
+}
+
 func TestCursorSeekAndDelete(t *testing.T) {
 	db, tearDown := setUpTestDB(t)
 	defer tearDown()

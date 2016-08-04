@@ -33,3 +33,20 @@ func inTestBucket(tb testing.TB, db *bolt.DB, fn func(*bolt.Bucket)) {
 		return nil
 	}))
 }
+
+func inReadOnlyTestBucket(tb testing.TB, db *bolt.DB, fn func(*bolt.Bucket)) {
+	require.NoError(tb, db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte("test"))
+		require.NoError(tb, err)
+		return nil
+	}))
+
+	require.NoError(tb, db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("test"))
+		require.NotNil(tb, bucket)
+
+		fn(bucket)
+
+		return nil
+	}))
+}

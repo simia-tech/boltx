@@ -26,6 +26,31 @@ func TestPutAndGet(t *testing.T) {
 	})
 }
 
+func TestPutAndGetOfInvalidModel(t *testing.T) {
+	db, tearDown := setUpTestDB(t)
+	defer tearDown()
+
+	inTestBucket(t, db, func(bucket *bolt.Bucket) {
+		key, value := []byte("test"), &model{field: "invalid"}
+		assert.Error(t, boltx.Put(bucket, key, value))
+
+		require.NoError(t, bucket.Put(key, []byte("invalid")))
+		model := &model{}
+		_, err := boltx.Get(bucket, key, model)
+		assert.Error(t, err)
+	})
+}
+
+func TestPutInReadOnlyBucket(t *testing.T) {
+	db, tearDown := setUpTestDB(t)
+	defer tearDown()
+
+	inReadOnlyTestBucket(t, db, func(bucket *bolt.Bucket) {
+		key, value := []byte("test"), &model{field: "test"}
+		assert.Error(t, boltx.Put(bucket, key, value))
+	})
+}
+
 func TestGetOfMissingModel(t *testing.T) {
 	db, tearDown := setUpTestDB(t)
 	defer tearDown()
