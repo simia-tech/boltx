@@ -17,7 +17,7 @@ func TestCursorIteratingForward(t *testing.T) {
 	inTestBucket(t, db, func(bucket *bolt.Bucket) {
 		require.NoError(t, boltx.Put(bucket, []byte("test"), &model{field: "test"}))
 
-		cursor := boltx.Cursorx(bucket)
+		cursor := boltx.Cursor(bucket)
 		assert.Equal(t, bucket, cursor.Bucket())
 
 		count := 0
@@ -37,7 +37,7 @@ func TestCursorIteratingBackward(t *testing.T) {
 	inTestBucket(t, db, func(bucket *bolt.Bucket) {
 		require.NoError(t, boltx.Put(bucket, []byte("test"), &model{field: "test"}))
 
-		cursor := boltx.Cursorx(bucket)
+		cursor := boltx.Cursor(bucket)
 		assert.Equal(t, bucket, cursor.Bucket())
 
 		count := 0
@@ -57,7 +57,7 @@ func TestCursorSeekAndDelete(t *testing.T) {
 	inTestBucket(t, db, func(bucket *bolt.Bucket) {
 		require.NoError(t, boltx.Put(bucket, []byte("test"), &model{field: "test"}))
 
-		cursor := boltx.Cursorx(bucket)
+		cursor := boltx.Cursor(bucket)
 		assert.Equal(t, bucket, cursor.Bucket())
 
 		model := &model{}
