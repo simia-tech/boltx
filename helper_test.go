@@ -19,7 +19,7 @@ func setUpTestDB(tb testing.TB) (*bolt.DB, func()) {
 
 	return db, func() {
 		require.NoError(tb, db.Close())
-		require.NoError(tb, os.Remove(file.Name()))
+		os.Remove(file.Name())
 	}
 }
 
