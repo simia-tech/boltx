@@ -23,3 +23,15 @@ func TestPutInBucketAndGetFromBucket(t *testing.T) {
 	value = boltx.GetFromBucket(db, name, key)
 	assert.Equal(t, "test", string(value))
 }
+
+func TestDeleteFromBucket(t *testing.T) {
+	db, tearDown := setUpTestDB(t)
+	defer tearDown()
+
+	name, key, value := []byte("test"), []byte("test"), []byte("test")
+
+	require.NoError(t, boltx.PutInBucket(db, name, key, value))
+
+	assert.NoError(t, boltx.DeleteFromBucket(db, []byte("missing"), key))
+	assert.NoError(t, boltx.DeleteFromBucket(db, name, key))
+}

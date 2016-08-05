@@ -31,3 +31,15 @@ func GetFromBucket(db *bolt.DB, name, key []byte) []byte {
 	})
 	return result
 }
+
+// DeleteFromBucket removes the provided key from the provided bucket.
+func DeleteFromBucket(db *bolt.DB, name, key []byte) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket(name)
+		if bucket == nil {
+			return nil
+		}
+		_ = bucket.Delete(key)
+		return nil
+	})
+}
