@@ -9,58 +9,82 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPutAndGet(t *testing.T) {
+func TestPutModelAndGetModel(t *testing.T) {
 	db, tearDown := setUpTestDB(t)
 	defer tearDown()
 
 	inTestBucket(t, db, func(bucket *bolt.Bucket) {
 		key, value := []byte("test"), &model{field: "test"}
-		require.NoError(t, boltx.Put(bucket, key, value))
+		require.NoError(t, boltx.PutModel(bucket, key, value))
 
-		model := &model{}
-		found, err := boltx.Get(bucket, key, model)
+		found, err := boltx.GetModel(bucket, key, value)
 		require.NoError(t, err)
 
 		assert.True(t, found)
-		assert.Equal(t, "test", model.field)
+		assert.Equal(t, "test", value.field)
 	})
 }
 
-func TestPutAndGetOfInvalidModel(t *testing.T) {
+func TestPutModelAndGetModelOfInvalidModel(t *testing.T) {
 	db, tearDown := setUpTestDB(t)
 	defer tearDown()
 
 	inTestBucket(t, db, func(bucket *bolt.Bucket) {
 		key, value := []byte("test"), &model{field: "invalid"}
-		assert.Error(t, boltx.Put(bucket, key, value))
+		assert.Error(t, boltx.PutModel(bucket, key, value))
 
 		require.NoError(t, bucket.Put(key, []byte("invalid")))
-		model := &model{}
-		_, err := boltx.Get(bucket, key, model)
+		_, err := boltx.GetModel(bucket, key, value)
 		assert.Error(t, err)
 	})
 }
 
-func TestPutInReadOnlyBucket(t *testing.T) {
+func TestPutModelInReadOnlyBucket(t *testing.T) {
 	db, tearDown := setUpTestDB(t)
 	defer tearDown()
 
 	inReadOnlyTestBucket(t, db, func(bucket *bolt.Bucket) {
 		key, value := []byte("test"), &model{field: "test"}
-		assert.Error(t, boltx.Put(bucket, key, value))
+		assert.Error(t, boltx.PutModel(bucket, key, value))
 	})
 }
 
-func TestGetOfMissingModel(t *testing.T) {
+func TestGetModelOfMissingModel(t *testing.T) {
 	db, tearDown := setUpTestDB(t)
 	defer tearDown()
 
 	inTestBucket(t, db, func(bucket *bolt.Bucket) {
-		model := &model{}
-		found, err := boltx.Get(bucket, []byte("missing"), model)
+		value := &model{}
+		found, err := boltx.GetModel(bucket, []byte("missing"), value)
 		require.NoError(t, err)
 
 		assert.False(t, found)
-		assert.Equal(t, "", model.field)
+		assert.Equal(t, "", value.field)
 	})
+}
+
+func TestPutModelInBucketAndGetModelFromBucket(t *testing.T) {
+	db, tearDown := setUpTestDB(t)
+	defer tearDown()
+
+	name, key := []byte("test"), []byte("test")
+
+	value := &model{field: "test"}
+	assert.Error(t, boltx.PutModelInBucket(db, []byte(""), key, value))
+	assert.Error(t, boltx.PutModelInBucket(db, name, key, &model{field: "invalid"}))
+	require.NoError(t, boltx.PutModelInBucket(db, name, key, value))
+
+	found, err := boltx.GetModelFromBucket(db, []byte("missing"), key, value)
+	require.NoError(t, err)
+	assert.False(t, found)
+
+	found, err = boltx.GetModelFromBucket(db, name, key, value)
+	require.NoError(t, err)
+	assert.True(t, found)
+	assert.Equal(t, "test", value.field)
+
+	require.NoError(t, boltx.PutInBucket(db, name, key, []byte("invalid")))
+	found, err = boltx.GetModelFromBucket(db, name, key, value)
+	assert.False(t, found)
+	assert.Error(t, err)
 }

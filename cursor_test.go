@@ -15,7 +15,7 @@ func TestCursorIterating(t *testing.T) {
 	defer tearDown()
 
 	inTestBucket(t, db, func(bucket *bolt.Bucket) {
-		require.NoError(t, boltx.Put(bucket, []byte("test"), &model{field: "test"}))
+		require.NoError(t, boltx.PutModel(bucket, []byte("test"), &model{field: "test"}))
 
 		count := 0
 		cursor, wrapper := bucket.Cursor(), boltx.CursorWrapper(&model{})
