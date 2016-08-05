@@ -15,7 +15,7 @@
 //
 //   model := &model{}
 //
-//   boltx.Put(bucket, []byte("key"), model)
+//   boltx.PutModel(bucket, []byte("key"), model)
 //
-//   boltx.Get(bucket, []byte("key"), model)
+//   boltx.GetModel(bucket, []byte("key"), model)
 package boltx
