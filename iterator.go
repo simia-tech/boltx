@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	// ActionNone indicates a noop.
-	ActionNone = 1 << iota
+	// ActionContinue tells the iterator to jump to the next element.
+	ActionContinue = 1 << iota
 
 	// ActionReturn indicates that the iteration should be stopped and the current element should be returned.
 	ActionReturn = 1 << iota

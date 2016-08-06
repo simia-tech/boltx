@@ -24,7 +24,7 @@ func TestForEachPick(t *testing.T) {
 			if string(key) == "test" {
 				return boltx.ActionReturn, nil
 			}
-			return boltx.ActionNone, nil
+			return boltx.ActionContinue, nil
 		})
 		require.NoError(t, err)
 		assert.Equal(t, "test", string(key))
@@ -105,7 +105,7 @@ func TestForEachErrors(t *testing.T) {
 		require.NoError(t, bucket.Put([]byte("test"), []byte("invalid")))
 
 		_, _, err = boltx.ForEach(bucket, &model{}, func(key []byte, value interface{}) (boltx.Action, error) {
-			return boltx.ActionNone, nil
+			return boltx.ActionContinue, nil
 		})
 		assert.Error(t, err)
 
@@ -124,7 +124,7 @@ func TestForEachErrors(t *testing.T) {
 		assert.Error(t, err)
 
 		_, _, err = boltx.ForEach(bucket, &modelWithoutMarshaler{}, func(key []byte, value interface{}) (boltx.Action, error) {
-			return boltx.ActionNone, errors.New("error")
+			return boltx.ActionContinue, errors.New("error")
 		})
 		assert.Error(t, err)
 
