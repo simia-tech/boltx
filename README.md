@@ -25,3 +25,23 @@ boltx.PutModel(bucket, []byte("key"), model)
 
 boltx.GetModel(bucket, []byte("key"), model)
 ```
+
+## Deque
+
+The `Deque` helper implements a deque (double-ended queue) on a bucket. It's persistent and safe to use with
+multiple goroutines.
+
+```golang
+deque := boltx.NewDeque(db, []byte("deque-test"))
+
+go func () {
+  for i := 0; i < 10; i++ {
+    deque.EnqueueBack(&model{"item"})
+  }
+}()
+
+model := &model{}
+for found, _ := deque.DequeueFront(model); found; found, _ = deque.DequeueFront(model) {
+  log.Println(model)
+}
+```

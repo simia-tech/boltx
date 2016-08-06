@@ -11,7 +11,21 @@ import (
 
 var middleKey = big.NewInt(0).SetUint64(math.MaxUint64 / 2)
 
-// Deque defines a double-ended queue.
+// Deque defines a double-ended queue on a bucket. It's persistent and safe to use with
+// multiple goroutines.
+//
+//   deque := boltx.NewDeque(db, []byte("deque-test"))
+//
+//   go func () {
+//     for i := 0; i < 10; i++ {
+//       deque.EnqueueBack(&model{"item"})
+//     }
+//   }()
+//
+//   model := &model{}
+//   for found, _ := deque.DequeueFront(model); found; found, _ = deque.DequeueFront(model) {
+//     log.Println(model)
+//   }
 type Deque struct {
 	db     *bolt.DB
 	name   []byte
