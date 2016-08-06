@@ -20,3 +20,15 @@ func (m *model) UnmarshalBinary(data []byte) error {
 	}
 	return nil
 }
+
+type modelWithoutMarshaler struct {
+	field string
+}
+
+func (m *modelWithoutMarshaler) UnmarshalBinary(data []byte) error {
+	m.field = string(data)
+	if m.field == "invalid" {
+		return errors.New("unmarshaling error")
+	}
+	return nil
+}
