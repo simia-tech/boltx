@@ -7,7 +7,7 @@ handling of models in a BoltDB bucket without being too opinionated.
 It's basically assumes that models implement `encoding.BinaryMarshaler` and `encoding.BinaryUnmarshaler` from Go's
 standard library.
 
-```golang
+```go
 type model struct { ... }
 
 func (m *model) MarshalBinary() ([]byte, error) { ... }
@@ -18,7 +18,7 @@ func (m *model) UnmarshalBinary([]byte) (error) { ... }
 Those methods should handle the (de)serialization of the model. The interfaces are than used by the functions of
 this package to store and load models.
 
-```golang
+```go
 model := &model{}
 
 boltx.PutModel(bucket, []byte("key"), model)
@@ -31,7 +31,7 @@ boltx.GetModel(bucket, []byte("key"), model)
 The `Deque` helper implements a deque (double-ended queue) on a bucket. It's persistent and safe to use with
 multiple goroutines.
 
-```golang
+```go
 deque := boltx.NewDeque(db, []byte("deque-test"))
 
 go func () {
