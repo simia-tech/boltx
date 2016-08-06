@@ -10,7 +10,7 @@ import (
 	"github.com/simia-tech/boltx"
 )
 
-func TestDequeEnqueueBackAndDequeueFront(t *testing.T) {
+func TestDequeQueueing(t *testing.T) {
 	db, tearDown := setUpTestDB(t)
 	defer tearDown()
 
@@ -35,7 +35,7 @@ func TestDequeEnqueueBackAndDequeueFront(t *testing.T) {
 	assert.False(t, found)
 }
 
-func TestDequeEnqueueFrontAndDequeueBack(t *testing.T) {
+func TestDequeReverseQueueing(t *testing.T) {
 	db, tearDown := setUpTestDB(t)
 	defer tearDown()
 
@@ -58,6 +58,33 @@ func TestDequeEnqueueFrontAndDequeueBack(t *testing.T) {
 	found, err = deque.DequeueBack(value)
 	assert.Error(t, err)
 	assert.False(t, found)
+}
+
+func TestDequeOrdering(t *testing.T) {
+	db, tearDown := setUpTestDB(t)
+	defer tearDown()
+
+	deque := boltx.NewDeque(db, []byte("test"))
+
+	require.NoError(t, deque.EnqueueFront(&model{field: "two"}))
+	require.NoError(t, deque.EnqueueFront(&model{field: "one"}))
+	require.NoError(t, deque.EnqueueBack(&model{field: "three"}))
+
+	model := &model{}
+	found, err := deque.DequeueFront(model)
+	require.NoError(t, err)
+	assert.True(t, found)
+	assert.Equal(t, "one", model.field)
+
+	found, err = deque.DequeueFront(model)
+	require.NoError(t, err)
+	assert.True(t, found)
+	assert.Equal(t, "two", model.field)
+
+	found, err = deque.DequeueFront(model)
+	require.NoError(t, err)
+	assert.True(t, found)
+	assert.Equal(t, "three", model.field)
 }
 
 func TestDequeDequeueFrontOnEmptyDequeAndEnqueueBack(t *testing.T) {
