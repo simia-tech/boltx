@@ -27,6 +27,8 @@ var middleKey = big.NewInt(0).SetUint64(math.MaxUint64 / 2)
 //     log.Println(model)
 //   }
 type Deque struct {
+	ReadOnly bool // used for testing purposes.
+
 	db     *bolt.DB
 	name   []byte
 	notify chan struct{}
@@ -70,13 +72,22 @@ func (d *Deque) DequeueBack(model encoding.BinaryUnmarshaler) (bool, error) {
 	})
 }
 
+// Size returns the number of elements in the deque.
+func (d *Deque) Size() int {
+	return BucketSize(d.db, d.name)
+}
+
 func (d *Deque) enqueue(model encoding.BinaryMarshaler, delta int64, fn func(*bolt.Cursor) ([]byte, []byte)) error {
-	tx, _ := d.db.Begin(true)
+	tx, _ := d.db.Begin(!d.ReadOnly)
 	defer tx.Rollback()
 
-	bucket, err := tx.CreateBucketIfNotExists(d.name)
-	if err != nil {
-		return errors.Wrapf(err, "bucket [%s] creation failed", d.name)
+	bucket := tx.Bucket(d.name)
+	if bucket == nil {
+		var err error
+		bucket, err = tx.CreateBucket(d.name)
+		if err != nil {
+			return errors.Wrapf(err, "bucket [%s] creation failed", d.name)
+		}
 	}
 
 	cursor := bucket.Cursor()
@@ -86,7 +97,7 @@ func (d *Deque) enqueue(model encoding.BinaryMarshaler, delta int64, fn func(*bo
 	}
 	key = addToKey(key, delta)
 
-	if err := PutModel(bucket, key, model); err != nil {
+	if err := PutModel(bucket, key, model); err != nil && errors.Cause(err) != bolt.ErrTxNotWritable {
 		return err
 	}
 
@@ -103,7 +114,7 @@ func (d *Deque) enqueue(model encoding.BinaryMarshaler, delta int64, fn func(*bo
 }
 
 func (d *Deque) dequeue(model encoding.BinaryUnmarshaler, fn func(*bolt.Cursor) ([]byte, []byte)) (bool, error) {
-	tx, _ := d.db.Begin(true)
+	tx, _ := d.db.Begin(!d.ReadOnly)
 	defer tx.Rollback()
 
 	var bucket *bolt.Bucket

@@ -29,9 +29,22 @@ func TestDeleteFromBucket(t *testing.T) {
 	defer tearDown()
 
 	name, key, value := []byte("test"), []byte("test"), []byte("test")
-
 	require.NoError(t, boltx.PutInBucket(db, name, key, value))
 
 	assert.NoError(t, boltx.DeleteFromBucket(db, []byte("missing"), key))
 	assert.NoError(t, boltx.DeleteFromBucket(db, name, key))
+}
+
+func TestBucketSize(t *testing.T) {
+	db, tearDown := setUpTestDB(t)
+	defer tearDown()
+
+	name, key, value := []byte("test"), []byte("test"), []byte("test")
+	require.NoError(t, boltx.PutInBucket(db, name, key, value))
+
+	assert.Equal(t, 0, boltx.BucketSize(db, []byte("missing")))
+
+	assert.Equal(t, 1, boltx.BucketSize(db, name))
+	require.NoError(t, boltx.DeleteFromBucket(db, name, key))
+	assert.Equal(t, 0, boltx.BucketSize(db, name))
 }

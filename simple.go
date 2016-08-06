@@ -43,3 +43,17 @@ func DeleteFromBucket(db *bolt.DB, name, key []byte) error {
 		return nil
 	})
 }
+
+// BucketSize returns the number of key/value pairs in the provided bucket. If the bucket doesn't
+// exists, 0 is returned.
+func BucketSize(db *bolt.DB, name []byte) int {
+	tx, _ := db.Begin(false)
+	defer tx.Rollback()
+
+	bucket := tx.Bucket(name)
+	if bucket == nil {
+		return 0
+	}
+
+	return bucket.Stats().KeyN
+}
