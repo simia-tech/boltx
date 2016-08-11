@@ -16,9 +16,7 @@ var middleKey = big.NewInt(0).SetUint64(math.MaxUint64 / 2)
 //   deque := boltx.NewDeque(db, []byte("deque-test"))
 //
 //   go func () {
-//     for i := 0; i < 10; i++ {
-//       deque.EnqueueModelBack(&model{"item"})
-//     }
+//     deque.EnqueueModelBack(&model{"item"})
 //   }()
 //
 //   model := &model{}
