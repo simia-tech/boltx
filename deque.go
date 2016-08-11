@@ -17,14 +17,14 @@ var middleKey = big.NewInt(0).SetUint64(math.MaxUint64 / 2)
 //
 //   go func () {
 //     for i := 0; i < 10; i++ {
-//       deque.EnqueueBack(&model{"item"})
+//       deque.EnqueueModelBack(&model{"item"})
 //     }
 //   }()
 //
 //   model := &model{}
-//   for found, _ := deque.DequeueFront(model); found; found, _ = deque.DequeueFront(model) {
-//     log.Println(model)
-//   }
+//   deque.DequeueModelFront(model)
+//
+//   log.Println(model)
 type Deque struct {
 	db      *bolt.DB
 	name    []byte
