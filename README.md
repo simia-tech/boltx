@@ -26,6 +26,21 @@ boltx.PutModel(bucket, []byte("key"), model)
 boltx.GetModel(bucket, []byte("key"), model)
 ```
 
+## Queue
+
+The `Queue` helper implements a queue (single-ended) on a bucket. It's persistent and safe to used with
+multiple goroutines.
+
+```go
+queue := boltx.NewQueue(db, []byte("queue-test"))
+queue.EnqueueModel(&model{"item"})
+
+model := &model{}
+queue.DequeueModel(model)
+
+log.Println(model)
+```
+
 ## Deque
 
 The `Deque` helper implements a deque (double-ended queue) on a bucket. It's persistent and safe to use with

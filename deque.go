@@ -2,13 +2,9 @@ package boltx
 
 import (
 	"encoding"
-	"math"
-	"math/big"
 
 	"github.com/boltdb/bolt"
 )
-
-var middleKey = big.NewInt(0).SetUint64(math.MaxUint64 / 2)
 
 // Deque defines a double-ended queue on a bucket. It's persistent and safe to use with
 // multiple goroutines.
