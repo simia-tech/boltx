@@ -2,11 +2,11 @@ package boltx
 
 import (
 	"encoding"
+	"fmt"
 	"math"
 	"math/big"
 
 	"github.com/boltdb/bolt"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -114,7 +114,7 @@ func PopModelOrWait(
 	value := PopOrWait(tx, name, position, session)
 
 	if err := model.UnmarshalBinary(value); err != nil {
-		return errors.Wrap(err, "unmarshaling failed")
+		return fmt.Errorf("unmarshaling failed: %v", err)
 	}
 
 	return nil
@@ -131,7 +131,7 @@ func PushModelAndSignal(
 ) error {
 	value, err := model.MarshalBinary()
 	if err != nil {
-		return errors.Wrap(err, "marshaling failed")
+		return fmt.Errorf("marshaling failed: %v", err)
 	}
 
 	if err := PushAndSignal(tx, name, position, value, defaultKey, session); err != nil {

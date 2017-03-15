@@ -2,10 +2,10 @@ package boltx
 
 import (
 	"encoding"
+	"fmt"
 	"reflect"
 
 	"github.com/boltdb/bolt"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -41,7 +41,7 @@ func ForEach(
 		model := reflect.New(t).Interface().(encoding.BinaryUnmarshaler)
 
 		if err := model.UnmarshalBinary(value); err != nil {
-			return nil, nil, errors.Wrap(err, "unmarshaling failed")
+			return nil, nil, fmt.Errorf("unmarshaling failed: %v", err)
 		}
 
 		action, err := fn(key, model)
@@ -56,7 +56,7 @@ func ForEach(
 		} else if ActionUpdate&action != 0 {
 			bm, ok := model.(encoding.BinaryMarshaler)
 			if !ok {
-				return nil, nil, errors.Errorf("prototype %T has to implement encoding.BinaryMarshaler in order to update", prototype)
+				return nil, nil, fmt.Errorf("prototype %T has to implement encoding.BinaryMarshaler in order to update", prototype)
 			}
 			if err := PutModel(bucket, key, bm); err != nil {
 				return nil, nil, err

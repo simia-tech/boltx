@@ -2,20 +2,20 @@ package boltx
 
 import (
 	"encoding"
+	"fmt"
 
 	"github.com/boltdb/bolt"
-	"github.com/pkg/errors"
 )
 
 // PutModel marshals the provided model and stores it in the provided bucket under the provided key.
 func PutModel(bucket *bolt.Bucket, key []byte, model encoding.BinaryMarshaler) error {
 	value, err := model.MarshalBinary()
 	if err != nil {
-		return errors.Wrap(err, "marshaling failed")
+		return fmt.Errorf("marshaling failed: %v", err)
 	}
 
 	if err := bucket.Put(key, value); err != nil {
-		return errors.Wrap(err, "put failed")
+		return fmt.Errorf("put failed: %v", err)
 	}
 
 	return nil
@@ -30,7 +30,7 @@ func GetModel(bucket *bolt.Bucket, key []byte, model encoding.BinaryUnmarshaler)
 	}
 
 	if err := model.UnmarshalBinary(value); err != nil {
-		return false, errors.Wrap(err, "unmarshaling failed")
+		return false, fmt.Errorf("unmarshaling failed: %v", err)
 	}
 
 	return true, nil
@@ -41,7 +41,7 @@ func GetModel(bucket *bolt.Bucket, key []byte, model encoding.BinaryUnmarshaler)
 func PutModelInBucket(db *bolt.DB, name, key []byte, model encoding.BinaryMarshaler) error {
 	value, err := model.MarshalBinary()
 	if err != nil {
-		return errors.Wrap(err, "marshaling failed")
+		return fmt.Errorf("marshaling failed: %v", err)
 	}
 	return PutInBucket(db, name, key, value)
 }
@@ -55,7 +55,7 @@ func GetModelFromBucket(db *bolt.DB, name, key []byte, model encoding.BinaryUnma
 	}
 
 	if err := model.UnmarshalBinary(value); err != nil {
-		return false, errors.Wrap(err, "unmarshaling failed")
+		return false, fmt.Errorf("unmarshaling failed: %v", err)
 	}
 
 	return true, nil

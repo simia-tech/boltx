@@ -1,8 +1,9 @@
 package boltx
 
 import (
+	"fmt"
+
 	"github.com/boltdb/bolt"
-	"github.com/pkg/errors"
 )
 
 // PutInBucket creates the bucket with the provided name if it's not existing and stores the
@@ -11,7 +12,7 @@ func PutInBucket(db *bolt.DB, name, key, value []byte) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists(name)
 		if err != nil {
-			return errors.Wrapf(err, "bucket [%s] creation failed", name)
+			return fmt.Errorf("bucket [%s] creation failed: %v", name, err)
 		}
 		return bucket.Put(key, value)
 	})
